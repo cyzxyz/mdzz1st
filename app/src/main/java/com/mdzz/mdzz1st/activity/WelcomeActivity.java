@@ -1,17 +1,27 @@
-package com.mdzz.mdzz1st.base;
+package com.mdzz.mdzz1st.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 
 import com.mdzz.mdzz1st.MainActivity;
 import com.mdzz.mdzz1st.R;
+import com.mdzz.mdzz1st.application.MDZZApplication;
+import com.mdzz.mdzz1st.base.BaseActivity;
+import com.mdzz.mdzz1st.component.ActivityComponent;
+
+
+import com.mdzz.mdzz1st.component.DaggerActivityComponent;
+import com.mdzz.mdzz1st.module.ActivityModule;
+import com.mdzz.mdzz1st.presenter.WelcomePresenter;
+import com.mdzz.mdzz1st.presenter.contract.WelcomeContract;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * @author 小侨
@@ -19,38 +29,48 @@ import com.mdzz.mdzz1st.R;
  * @desc ${TODD}
  */
 
-public class WelcomeActivity extends AppCompatActivity {
+public class WelcomeActivity extends BaseActivity<WelcomePresenter> implements WelcomeContract.View {
 
     private static final String TAG = "AppCompatActivity";
 
-    private ImageView mImageViewDictionaryIcon;
-    private ImageView mImageViewIdiomIcon;
-    private ImageView mImageViewTransitionIcon;
+    @BindView(R.id.imageViewDictionaryIcon)
+    ImageView mImageViewDictionaryIcon;
+
+    @BindView(R.id.imageViewIdiomIcon)
+    ImageView mImageViewIdiomIcon;
+
+    @BindView(R.id.imageViewTransitionIcon)
+    ImageView mImageViewTransitionIcon;
 
     private int mScreenWidth;
     private int mScreenHeight;
     private int mScreenCenterX;
     private int mScreenCenterY;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_welcome);
 
+
+
+    @Override
+    protected void initInject() {
+        getActivityComponent().inject(this);
+    }
+
+    @Override
+    protected int getLayout() {
+        return R.layout.activity_welcome;
+    }
+
+    @Override
+    protected void initEventAndData() {
         initView();
         setAnimation();
     }
 
     private void initView() {
-        mImageViewDictionaryIcon = (ImageView) findViewById(R.id.imageViewDictionaryIcon);
-        mImageViewIdiomIcon = (ImageView) findViewById(R.id.imageViewIdiomIcon);
-        mImageViewTransitionIcon = (ImageView) findViewById(R.id.imageViewTransitionIcon);
-
         mScreenWidth = getWindowManager().getDefaultDisplay().getWidth(); // 屏幕宽
         mScreenHeight = getWindowManager().getDefaultDisplay().getHeight(); // 屏幕高
         mScreenCenterX = mScreenWidth / 2;
         mScreenCenterY = mScreenHeight / 2;
-
         Log.v(TAG, "1:" + mScreenCenterX + "   2:" + mScreenCenterY);
     }
 
@@ -115,5 +135,28 @@ public class WelcomeActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void showError(String msg) {
+
+    }
+
+
+    protected ActivityComponent getActivityComponent(){
+        return  DaggerActivityComponent.builder()
+                .appModule(((MDZZApplication)getApplication()).getAppModule())
+                .activityModule(getActivityModule())
+                .build();
+
+    }
+
+    protected ActivityModule getActivityModule(){
+        return new ActivityModule(this);
+    }
+
+    @Override
+    public void showContent() {
+
     }
 }
